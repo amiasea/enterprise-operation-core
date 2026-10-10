@@ -1,0 +1,68 @@
+name: Build Operation Core
+
+on:
+  workflow_call:
+    inputs:
+      package-version:
+        description: NuGet package version to build
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: 11.0.x
+          dotnet-quality: preview
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::548890973033:role/amiasea-enterprise-restore
+          aws-region: us-east-1
+          allowed-account-ids: "548890973033"
+
+      - name: Configure CodeArtifact NuGet source
+        run: |
+          aws codeartifact login \
+            --tool dotnet \
+            --domain amiasea \
+            --domain-owner 548890973033 \
+            --repository nuget-enterprise \
+            --region us-east-1
+
+      - name: Restore
+        run: dotnet restore operation-core.slnx -p:Configuration=Release
+
+      - name: Test
+        run: dotnet test operation-core.slnx --configuration Release --no-restore
+
+      - name: Pack Operation.Core
+        run: |
+          dotnet pack \
+            src/Amiasea.Enterprise.Operation.Core/Amiasea.Enterprise.Operation.Core.csproj \
+            --configuration Release \
+            --no-restore \
+            --output artifacts \
+            -p:PackageVersion="${{ inputs.package-version }}"
+
+      - name: Upload NuGet package
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: nuget-package
+          path: artifacts/*.nupkg
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,47 @@
+name: Publish Operation Core to CodeArtifact
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download NuGet package
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: nuget-package
+          path: artifacts
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: 11.0.x
+          dotnet-quality: preview
+
+      - name: Configure AWS credentials through OIDC
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::548890973033:role/amiasea-enterprise-publish
+          aws-region: us-east-1
+          allowed-account-ids: "548890973033"
+
+      - name: Configure CodeArtifact NuGet source
+        run: |
+          aws codeartifact login \
+            --tool dotnet \
+            --domain amiasea \
+            --domain-owner 548890973033 \
+            --repository nuget-enterprise \
+            --region us-east-1
+
+      - name: Publish package
+        run: |
+          dotnet nuget push artifacts/*.nupkg \
+            --source "amiasea/nuget-enterprise" \
+            --skip-duplicate

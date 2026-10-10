@@ -1,0 +1,41 @@
+# .NET build output
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet packages
+*.nupkg
+*.snupkg
+**/packages/
+
+# Test results and coverage
+**/TestResults/
+**/BenchmarkDotNet.Artifacts/
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+
+# Build and publish output
+**/artifacts/
+**/publish/
+
+# Logs
+*.log
+
+# Environment and local configuration
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+appsettings.Development.local.json
+
+# Operating system
+.DS_Store
+Thumbs.db

@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/operation/">
+		<Project Path="src/Amiasea.Enterprise.Operation.Core/Amiasea.Enterprise.Operation.Core.csproj" />
+	</Folder>
+</Solution>
