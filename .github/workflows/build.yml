@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   build:
@@ -26,7 +27,7 @@ jobs:
         with:
           dotnet-version: 11.0.x
           dotnet-quality: preview
-          
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
@@ -44,7 +45,7 @@ jobs:
             --region us-east-1
 
       - name: Restore
-        run: dotnet restore operation-core.slnx
+        run: dotnet restore operation-core.slnx --configuration Release
 
       - name: Test
         run: dotnet test operation-core.slnx --configuration Release --no-restore
