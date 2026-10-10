@@ -45,7 +45,7 @@ jobs:
             --region us-east-1
 
       - name: Restore
-        run: dotnet restore operation-core.slnx --configuration Release
+        run: dotnet restore operation-core.slnx -p:Configuration=Release
 
       - name: Test
         run: dotnet test operation-core.slnx --configuration Release --no-restore
