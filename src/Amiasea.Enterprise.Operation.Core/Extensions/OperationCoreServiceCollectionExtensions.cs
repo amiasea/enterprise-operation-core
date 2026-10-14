@@ -1,8 +1,6 @@
-using Amiasea.Enterprise.Data.Core;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Amiasea.Enterprise.Operation.Core;
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class OperationCoreServiceCollectionExtensions
 {

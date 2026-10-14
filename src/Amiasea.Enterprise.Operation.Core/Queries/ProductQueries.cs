@@ -1,41 +1,34 @@
 using GreenDonut.Data;
 using HotChocolate.Types;
 using HotChocolate.Types.Pagination;
-using Microsoft.EntityFrameworkCore;
-
-using Amiasea.Enterprise.Data.Core;
-using Amiasea.Enterprise.Data.Core.DataLoader;
-using Amiasea.Enterprise.Operation.Core.Mapper;
 
 using ProductContract = Amiasea.Enterprise.Contract.Core.Types.Product;
+using Wolverine;
+using Amiasea.Enterprise.Contract.Core.Queries;
+using Amiasea.Enterprise.Contract.Core.Types;
 
 namespace Amiasea.Enterprise.Operation.Core.Queries;
 
 [QueryType]
 public static partial class ProductQueries
 {
-    public static async Task<ProductContract?> GetProductByIdAsync(
-        Guid id,
-        IProductByIdDataLoader productsById,
-        CancellationToken cancellationToken)
-    {
-        var product = await productsById.LoadAsync(id, cancellationToken);
+  public static Task<ProductContract?> GetProductByIdAsync(
+      Guid id,
+      IMessageBus bus,
+      CancellationToken cancellationToken)
+  {
+    return bus.InvokeAsync<ProductContract?>(
+        new GetProductByIdQuery(id),
+        cancellationToken);
+  }
 
-        return product?.ToContract();
-    }
-
-    public static async Task<PageConnection<ProductContract>> GetProductsAsync(
+  public static Task<PageConnection<ProductContract>> GetProductsAsync(
         PagingArguments pagingArgs,
-        CoreDbContext db,
+        IMessageBus bus,
         CancellationToken cancellationToken)
     {
-        return await db.Products
-            .AsNoTracking()
-            .OrderBy(product => product.Id)
-            .Select(product => new ProductContract(
-                product.Id,
-                product.Name,
-                product.Price))
-            .ToPageAsync(pagingArgs, cancellationToken);
+        return bus.InvokeAsync<PageConnection<ProductContract>>(
+            new GetProductsQuery(pagingArgs),
+            cancellationToken);
     }
 }
